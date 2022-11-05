@@ -44,8 +44,9 @@ namespace MichomeFirmwareManager
                 return tmp;
             }
 
-            foreach (var item in firs.Split('\n'))
+            foreach (var item in firs.Split(';'))
             {
+                if(item != "")
                 tmp.Add(Path.GetFileNameWithoutExtension(item), "http://"+ ipGateway + "/michome/firmwares/" + item);
             }
             return tmp;

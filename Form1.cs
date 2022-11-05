@@ -65,13 +65,22 @@ namespace MichomeFirmwareManager
                 //node.ContextMenu = new ContextMenu(new MenuItem[] { new MenuItem("Перезагрузить модуль", (a, b) => Gateway.SetData(moduleID, "restart")) });
                 treeView1.Nodes["local"].Nodes.Add(node);
             }
-            
-            foreach (var item in FilesUpdates.GetGatewayFirmwares(GatewayIP))
+
+            BackgroundWorker bw = new BackgroundWorker();
+            bw.WorkerSupportsCancellation = true;
+            bw.WorkerReportsProgress = true;
+            bw.DoWork += (a, b) =>
             {
-                var node = new TreeNode(item.Key) { Name = item.Value };
-                //node.ContextMenu = new ContextMenu(new MenuItem[] { new MenuItem("Перезагрузить модуль", (a, b) => Gateway.SetData(moduleID, "restart")) });
-                treeView1.Nodes["gateway"].Nodes.Add(node);
-            }
+                foreach (var item in FilesUpdates.GetGatewayFirmwares(GatewayIP))
+                {
+                    Invoke(new Action(() => { 
+                        var node = new TreeNode(item.Key) { Name = item.Value };
+                        //node.ContextMenu = new ContextMenu(new MenuItem[] { new MenuItem("Перезагрузить модуль", (a, b) => Gateway.SetData(moduleID, "restart")) });
+                        treeView1.Nodes["gateway"].Nodes.Add(node);
+                    }));
+                }
+            };
+            bw.RunWorkerAsync();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -213,6 +222,12 @@ namespace MichomeFirmwareManager
             if (SelMod == null)
                 return;
             Process.Start("http://"+SelMod.Name+"/configurator");
+        }
+
+        private void добавитьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddModuleList(toolStripTextBox2.Text);
+            toolStripTextBox2.Text = "";
         }
     }
 }
